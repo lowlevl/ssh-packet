@@ -135,6 +135,14 @@ impl Packet {
     }
 }
 
+impl std::ops::Deref for Packet {
+    type Target = [u8];
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
 /// Allow types implementing [`BinWrite`] to be easily converted to a [`Packet`].
 pub trait IntoPacket {
     /// Convert the current type to a [`Packet`].
