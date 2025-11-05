@@ -1,8 +1,21 @@
-use crate::Error;
+//! Utilities for the SSH identification string.
 
-const VERSION: &str = "2.0";
+use thiserror::Error;
 
-/// The SSH identification string as defined in the SSH protocol.
+/// Errors which can occur when attempting to parse an [`Id`].
+#[non_exhaustive]
+#[derive(Debug, Error)]
+pub enum ParseError {
+    /// An error occured while performing I/O operations.
+    #[error(transparent)]
+    Io(#[from] std::io::Error),
+
+    /// The parsed identifier was not conformant.
+    #[error("SSH identifier was either misformatted or misprefixed")]
+    BadIdentifer(String),
+}
+
+/// Identification string as defined in the SSH protocol.
 ///
 /// The format must match the following pattern:
 /// `SSH-<protoversion>-<softwareversion>[ <comments>]`.
@@ -23,6 +36,8 @@ pub struct Id {
 impl Id {
     /// Convenience method to create an `SSH-2.0` identifier string.
     pub fn v2(softwareversion: impl Into<String>, comments: Option<impl Into<String>>) -> Self {
+        const VERSION: &str = "2.0";
+
         Self {
             protoversion: VERSION.into(),
             softwareversion: softwareversion.into(),
@@ -34,10 +49,12 @@ impl Id {
     #[cfg_attr(docsrs, doc(cfg(feature = "futures")))]
     /// Read an [`Id`], discarding any _extra lines_ sent by the server
     /// from the provided asynchronous `reader`.
-    pub async fn from_reader<R>(reader: &mut R) -> Result<Self, Error>
+    pub async fn from_reader<R>(reader: &mut R) -> Result<Self, ParseError>
     where
         R: futures::io::AsyncBufRead + Unpin,
     {
+        use std::io;
+
         use futures::TryStreamExt;
 
         let text = futures::io::AsyncBufReadExt::lines(reader)
@@ -45,7 +62,10 @@ impl Id {
             .try_skip_while(|line| futures::future::ok(!line.starts_with("SSH")))
             .try_next()
             .await?
-            .ok_or(Error::UnexpectedEof)?;
+            .ok_or(io::Error::new(
+                io::ErrorKind::UnexpectedEof,
+                "unexpected EOF while waiting for SSH identifer",
+            ))?;
 
         text.parse()
     }
@@ -53,7 +73,7 @@ impl Id {
     #[cfg(feature = "futures")]
     #[cfg_attr(docsrs, doc(cfg(feature = "futures")))]
     /// Write the [`Id`] to the provided asynchronous `writer`.
-    pub async fn to_writer<W>(&self, writer: &mut W) -> Result<(), Error>
+    pub async fn to_writer<W>(&self, writer: &mut W) -> std::io::Result<()>
     where
         W: futures::io::AsyncWrite + Unpin,
     {
@@ -79,7 +99,7 @@ impl std::fmt::Display for Id {
 }
 
 impl std::str::FromStr for Id {
-    type Err = Error;
+    type Err = ParseError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let (id, comments) = s
@@ -96,7 +116,7 @@ impl std::str::FromStr for Id {
                     comments: comments.map(str::to_string),
                 })
             }
-            _ => Err(Error::BadIdentifer(s.into())),
+            _ => Err(ParseError::BadIdentifer(s.into())),
         }
     }
 }
@@ -108,15 +128,6 @@ mod tests {
     use std::str::FromStr;
 
     use super::*;
-
-    impl PartialEq for Error {
-        fn eq(&self, other: &Self) -> bool {
-            match (self, other) {
-                (Self::Io(l0), Self::Io(r0)) => l0.kind() == r0.kind(),
-                _ => core::mem::discriminant(self) == core::mem::discriminant(other),
-            }
-        }
-    }
 
     #[rstest]
     #[case("SSH-2.0-billsSSH_3.6.3q3")]
