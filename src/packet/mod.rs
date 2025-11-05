@@ -17,20 +17,16 @@ pub const PACKET_MAX_SIZE: usize = u16::MAX as usize;
 /// the largest block cipher's block-size.
 pub const PACKET_MIN_SIZE: usize = 16;
 
-/// A SSH 2.0 binary packet representation.
+/// A packet _deserialization_ & _serialization_ helper.
 ///
 /// see <https://datatracker.ietf.org/doc/html/rfc4253#section-6>.
 #[derive(Debug, Clone)]
-
-pub struct Packet {
-    /// SSH packet's payload as binary.
-    pub payload: Vec<u8>,
-}
+pub struct Packet(pub Vec<u8>);
 
 impl Packet {
     /// Try to deserialize the [`Packet`] into `T`.
     pub fn to<T: for<'a> BinRead<Args<'a> = ()> + ReadEndian>(&self) -> Result<T, binrw::Error> {
-        T::read(&mut std::io::Cursor::new(&self.payload))
+        T::read(&mut std::io::Cursor::new(&self.0))
     }
 
     #[cfg(feature = "futures")]
@@ -53,13 +49,13 @@ impl Packet {
         let len = u32::from_be_bytes(
             buf[..4]
                 .try_into()
-                .expect("The buffer of size 4 is not of size 4"),
+                .expect("buffer of size 4 is not of size 4"),
         );
 
         if len as usize > PACKET_MAX_SIZE {
             return Err(binrw::Error::Custom {
-                pos: 0x0,
-                err: Box::new(format!("Packet size too large, {len} > {PACKET_MAX_SIZE}")),
+                pos: len as u64,
+                err: Box::new(format!("packet size too large, {len} > {PACKET_MAX_SIZE}")),
             })?;
         }
 
@@ -96,7 +92,7 @@ impl Packet {
 
         let payload = cipher.decompress(payload)?;
 
-        Ok(Self { payload })
+        Ok(Self(payload))
     }
 
     #[cfg(feature = "futures")]
@@ -114,7 +110,7 @@ impl Packet {
     {
         use futures::AsyncWriteExt;
 
-        let compressed = cipher.compress(&self.payload)?;
+        let compressed = cipher.compress(&self.0)?;
 
         let padding = cipher.padding(compressed.len());
         let buf = cipher.pad(compressed, padding)?;
@@ -155,10 +151,8 @@ impl<T: for<'a> BinWrite<Args<'a> = ()> + WriteEndian> IntoPacket for &T {
     fn into_packet(self) -> Packet {
         let mut buffer = std::io::Cursor::new(Vec::new());
         self.write(&mut buffer)
-            .expect("Failed to convert `impl BinWrite` type to Packet");
+            .expect("failed to convert `impl BinWrite` type to Packet");
 
-        Packet {
-            payload: buffer.into_inner(),
-        }
+        Packet(buffer.into_inner())
     }
 }
