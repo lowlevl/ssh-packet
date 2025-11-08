@@ -5,6 +5,8 @@ use binrw::{
     meta::{ReadEndian, WriteEndian},
 };
 
+use crate::Packet;
+
 /// An helper to prefix a serializable value with it's `size`.
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
 pub struct Lengthed<T>(pub T);
@@ -35,7 +37,7 @@ where
         args: Self::Args<'_>,
     ) -> binrw::BinResult<Self> {
         let size = u32::read_be(reader)?;
-        let len = (size as usize).min(crate::PACKET_MAX_SIZE);
+        let len = (size as usize).min(Packet::MAX_SIZE);
 
         let mut buf = Vec::with_capacity(len);
         reader.read_exact(&mut buf[..len])?;
@@ -63,12 +65,12 @@ where
         endian: binrw::Endian,
         args: Self::Args<'_>,
     ) -> binrw::BinResult<()> {
-        let mut buf = Vec::with_capacity(crate::PACKET_MAX_SIZE);
+        let mut buf = Vec::with_capacity(Packet::MAX_SIZE);
         self.0
             .write_options(&mut io::Cursor::new(&mut buf), endian, args)?;
 
         let len = buf.len();
-        let size: u32 = len.min(crate::PACKET_MAX_SIZE) as u32;
+        let size: u32 = len.min(Packet::MAX_SIZE) as u32;
 
         size.write_be(writer)?;
         Ok(writer.write_all(&buf)?)
