@@ -1,14 +1,14 @@
 [package]
 name = "ssh-packet"
+version = "0.9.0"
+authors = ["Maya the bee <15341887+lowlevl@users.noreply.github.com>"]
+edition = "2021"
+keywords = ["ssh", "binary"]
 description = "A library implementing SSH packet reading/writing using `binrw`."
 documentation = "https://docs.rs/ssh-packet"
 repository = "https://github.com/lowlevl/ssh-packet"
-readme = "README.md"
 license = "GPL-3.0"
-keywords = ["ssh", "binary"]
-authors = ["Maya the bee <15341887+lowlevl@users.noreply.github.com>"]
-version = "0.9.0"
-edition = "2021"
+readme = "README.md"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -21,17 +21,17 @@ all-features = true
 rustdoc-args = ["--cfg", "docsrs"]
 
 [dependencies]
-binrw = "0.14.0"
-thiserror = "1.0.49"
+binrw = "0.15.0"
+thiserror = "2.0.17"
 
 # Optional dependencies
-futures = { version = "0.3.28", default-features = false, features = [
+futures = { version = "0.3.31", default-features = false, features = [
     "std",
 ], optional = true }
 digest = { version = "0.10.7", default-features = false, optional = true }
 signature = { version = "2.2.0", default-features = false, optional = true }
-zeroize = { version = "1.8.1", features = ["derive"], optional = true }
+zeroize = { version = "1.8.2", features = ["derive"], optional = true }
 
 [dev-dependencies]
-rstest = "0.21.0"
-async-std = { version = "1.12.0", features = ["attributes"] }
+rstest = "0.26.1"
+async-std = { version = "1.13.2", features = ["attributes"] }
