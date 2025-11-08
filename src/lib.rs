@@ -16,8 +16,8 @@ pub use ::binrw;
 
 mod packet;
 pub use packet::{
-    CipherCore, IntoPacket, Mac, OpeningCipher, Packet, SealingCipher, PACKET_MAX_SIZE,
-    PACKET_MIN_SIZE,
+    CipherCore, IntoPacket, Mac, OpeningCipher, PACKET_MAX_SIZE, PACKET_MIN_SIZE, Packet,
+    SealingCipher,
 };
 
 pub mod arch;

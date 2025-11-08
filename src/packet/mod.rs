@@ -1,6 +1,6 @@
 use binrw::{
-    meta::{ReadEndian, WriteEndian},
     BinRead, BinWrite,
+    meta::{ReadEndian, WriteEndian},
 };
 
 mod cipher;

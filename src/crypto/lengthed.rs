@@ -1,8 +1,8 @@
 use std::{io, ops::Deref};
 
 use binrw::{
-    meta::{ReadEndian, WriteEndian},
     BinRead, BinWrite,
+    meta::{ReadEndian, WriteEndian},
 };
 
 /// An helper to prefix a serializable value with it's `size`.
