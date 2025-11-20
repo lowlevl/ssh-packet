@@ -390,7 +390,7 @@ pub enum ChannelRequestContext<'b> {
         /// X11 authentication cookie.
         x11_authentication_cookie: arch::Bytes<'b>,
 
-        /// X11 authentication number.
+        /// X11 screen number.
         x11_screen_number: u32,
     },
 
