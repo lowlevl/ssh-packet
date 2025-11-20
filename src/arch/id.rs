@@ -1,6 +1,6 @@
 //! Utilities for the SSH identification string.
 
-/// Errors which can occur when attempting to parse an [`Id`].
+/// Errors that can occur while parsing an [`Id`].
 #[non_exhaustive]
 #[derive(Debug)]
 pub enum ParseError {

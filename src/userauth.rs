@@ -3,7 +3,16 @@
 
 use binrw::binrw;
 
-use crate::arch;
+use super::{Packet, arch};
+
+impl Packet for Request<'_> {}
+impl Packet for Failure<'_> {}
+impl Packet for Success {}
+impl Packet for Banner<'_> {}
+impl Packet for PkOk<'_> {}
+impl Packet for PasswdChangereq<'_> {}
+impl Packet for InfoRequest<'_> {}
+impl Packet for InfoResponse {}
 
 /// The `SSH_MSG_USERAUTH_REQUEST` message.
 ///
@@ -130,6 +139,42 @@ impl Method<'_> {
     }
 }
 
+/// The `SSH_MSG_USERAUTH_FAILURE` message.
+///
+/// see <https://datatracker.ietf.org/doc/html/rfc4252#section-5.1>.
+#[binrw]
+#[derive(Debug, Default, Clone)]
+#[brw(big, magic = 51_u8)]
+pub struct Failure<'b> {
+    /// Authentications that can continue.
+    pub continue_with: arch::NameList<'b>,
+
+    /// Partial success.
+    pub partial_success: arch::Bool,
+}
+
+/// The `SSH_MSG_USERAUTH_SUCCESS` message.
+///
+/// see <https://datatracker.ietf.org/doc/html/rfc4252#section-5.1>.
+#[binrw]
+#[derive(Debug, Default, Clone)]
+#[brw(big, magic = 52_u8)]
+pub struct Success;
+
+/// The `SSH_MSG_USERAUTH_BANNER` message.
+///
+/// see <https://datatracker.ietf.org/doc/html/rfc4252#section-5.4>.
+#[binrw]
+#[derive(Debug, Default, Clone)]
+#[brw(big, magic = 53_u8)]
+pub struct Banner<'b> {
+    /// The auth banner message.
+    pub message: arch::Utf8<'b>,
+
+    /// Language tag.
+    pub language: arch::Ascii<'b>,
+}
+
 /// The `SSH_MSG_USERAUTH_PK_OK` message.
 ///
 /// see <https://datatracker.ietf.org/doc/html/rfc4252#section-7>.
@@ -207,40 +252,4 @@ pub struct InfoResponse {
     /// Responses to the provided challenge.
     #[br(count = num_responses)]
     pub responses: Vec<arch::Utf8<'static>>,
-}
-
-/// The `SSH_MSG_USERAUTH_FAILURE` message.
-///
-/// see <https://datatracker.ietf.org/doc/html/rfc4252#section-5.1>.
-#[binrw]
-#[derive(Debug, Default, Clone)]
-#[brw(big, magic = 51_u8)]
-pub struct Failure<'b> {
-    /// Authentications that can continue.
-    pub continue_with: arch::NameList<'b>,
-
-    /// Partial success.
-    pub partial_success: arch::Bool,
-}
-
-/// The `SSH_MSG_USERAUTH_SUCCESS` message.
-///
-/// see <https://datatracker.ietf.org/doc/html/rfc4252#section-5.1>.
-#[binrw]
-#[derive(Debug, Default, Clone)]
-#[brw(big, magic = 52_u8)]
-pub struct Success;
-
-/// The `SSH_MSG_USERAUTH_BANNER` message.
-///
-/// see <https://datatracker.ietf.org/doc/html/rfc4252#section-5.4>.
-#[binrw]
-#[derive(Debug, Default, Clone)]
-#[brw(big, magic = 53_u8)]
-pub struct Banner<'b> {
-    /// The auth banner message.
-    pub message: arch::Utf8<'b>,
-
-    /// Language tag.
-    pub language: arch::Ascii<'b>,
 }

@@ -1,8 +1,8 @@
-//! Facilities to use some of the _signature algorithms_.
+//! Facilities to interact with some of the _signature algorithms_.
 
 use binrw::binwrite;
 
-use crate::arch;
+use super::arch;
 
 /// The data that gets _signed_ and _verified_ to prove the possession of the said private key in
 /// the `publickey` authentication method, computed from the concatenation of the following.

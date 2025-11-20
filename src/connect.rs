@@ -5,7 +5,23 @@ use std::num::NonZeroU32;
 
 use binrw::binrw;
 
-use crate::arch;
+use super::{Packet, arch};
+
+impl Packet for GlobalRequest<'_> {}
+impl Packet for RequestSuccess {}
+impl Packet for ForwardingSuccess {}
+impl Packet for RequestFailure {}
+impl Packet for ChannelOpen<'_> {}
+impl Packet for ChannelOpenConfirmation {}
+impl Packet for ChannelOpenFailure<'_> {}
+impl Packet for ChannelWindowAdjust {}
+impl Packet for ChannelData<'_> {}
+impl Packet for ChannelExtendedData<'_> {}
+impl Packet for ChannelEof {}
+impl Packet for ChannelClose {}
+impl Packet for ChannelRequest<'_> {}
+impl Packet for ChannelSuccess {}
+impl Packet for ChannelFailure {}
 
 /// The `SSH_MSG_GLOBAL_REQUEST` message.
 ///

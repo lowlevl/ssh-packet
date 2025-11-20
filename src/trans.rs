@@ -4,7 +4,20 @@
 
 use binrw::binrw;
 
-use crate::arch;
+use super::{Packet, arch};
+
+impl Packet for Disconnect<'_> {}
+impl Packet for Ignore<'_> {}
+impl Packet for Unimplemented {}
+impl Packet for Debug<'_> {}
+impl Packet for ServiceRequest<'_> {}
+impl Packet for ServiceAccept<'_> {}
+impl Packet for KexInit<'_> {}
+impl Packet for NewKeys {}
+impl Packet for KexdhInit<'_> {}
+impl Packet for KexdhReply<'_> {}
+impl Packet for KexEcdhInit<'_> {}
+impl Packet for KexEcdhReply<'_> {}
 
 /// The `SSH_MSG_DISCONNECT` message.
 ///
