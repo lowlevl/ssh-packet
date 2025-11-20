@@ -1,18 +1,31 @@
 //! Utilities for the SSH identification string.
 
-use thiserror::Error;
-
 /// Errors which can occur when attempting to parse an [`Id`].
 #[non_exhaustive]
-#[derive(Debug, Error)]
+#[derive(Debug)]
 pub enum ParseError {
     /// An error occured while performing I/O operations.
-    #[error(transparent)]
-    Io(#[from] std::io::Error),
+    Io(std::io::Error),
 
-    /// The parsed identifier was not conformant.
-    #[error("SSH identifier was either misformatted or misprefixed")]
-    BadIdentifer(String),
+    /// The identifier format is not conformant.
+    Format(String),
+}
+
+impl std::fmt::Display for ParseError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Io(err) => err.fmt(f),
+            Self::Format(id) => write!(f, "misformatted identifier: {id}"),
+        }
+    }
+}
+
+impl std::error::Error for ParseError {}
+
+impl From<std::io::Error> for ParseError {
+    fn from(value: std::io::Error) -> Self {
+        Self::Io(value)
+    }
 }
 
 /// Identification string as defined in the SSH protocol.
@@ -116,7 +129,7 @@ impl std::str::FromStr for Id {
                     comments: comments.map(str::to_string),
                 })
             }
-            _ => Err(ParseError::BadIdentifer(s.into())),
+            _ => Err(ParseError::Format(s.into())),
         }
     }
 }
