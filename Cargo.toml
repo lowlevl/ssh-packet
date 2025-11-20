@@ -22,7 +22,6 @@ rustdoc-args = ["--cfg", "docsrs"]
 
 [dependencies]
 binrw = "0.15.0"
-thiserror = "2.0.17"
 
 # Optional dependencies
 futures = { version = "0.3.31", default-features = false, features = ["std"], optional = true }
