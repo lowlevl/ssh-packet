@@ -2,8 +2,10 @@
 
 use binrw::binwrite;
 
-use super::Lengthed;
-use crate::{arch, trans};
+use super::{arch, trans};
+
+mod lengthed;
+pub use lengthed::Lengthed;
 
 /// The exchange hash for ECDH, computed as the
 /// hash of the concatenation of the following.
