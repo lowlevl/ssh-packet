@@ -42,7 +42,7 @@ impl Ecdh<'_> {
     /// Produce the exchange hash with the specified digest algorithm.
     #[cfg(feature = "digest")]
     #[cfg_attr(docsrs, doc(cfg(feature = "digest")))]
-    pub fn hash<D: digest::Digest>(&self) -> digest::Output<D> {
+    pub fn hash<D: signature::digest::Digest>(&self) -> signature::digest::Output<D> {
         use binrw::BinWrite;
 
         let mut buffer = Vec::new();
